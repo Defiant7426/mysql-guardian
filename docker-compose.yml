@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-guardian-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Qp!@#123
+      MYSQL_DATABASE: olist_db
+      MYSQL_USER: guardian_user
+      MYSQL_PASSWORD: P@ssw0rd
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - guardian-net
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mysql-guardian-backend
+    restart: always
+    ports:
+      - 8000:8000
+    depends_on:
+      - mysql-db
+    networks:
+      - guardian-net
+    
+    frontend:
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile
+      container_name: mysql-guardian-frontend
+      restart: always
+      ports:
+        - "5173:5173"
+      depends_on:
+        - backend
+      networks:
+        - guardian-net
+
+volumes:
+  mysql-data:
+
+networks:
+  guardian-net:
+    driver: bridge
